@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"simple-monitor/systeminfo"
 	"strconv"
 	"strings"
 )
@@ -29,22 +30,20 @@ type MonitoringOptions struct {
 
 // displayMainMenu shows the main menu to the user
 func displayMainMenu() {
-	fmt.Println("\n" + strings.Repeat("=", 50))
-	fmt.Println("           🖥️  Simple Monitor v1.0")
-	fmt.Println(strings.Repeat("=", 50))
+	fmt.Println("\n🖥️  Simple Monitor v1.0")
+	fmt.Println(strings.Repeat("-", 30))
 	fmt.Println("1. Start Monitoring")
 	fmt.Println("2. Settings")
 	fmt.Println("3. Developer")
 	fmt.Println("4. Quit")
-	fmt.Println(strings.Repeat("=", 50))
-	fmt.Print("Please select an option (1-4): ")
+	fmt.Println(strings.Repeat("-", 30))
+	fmt.Print("Select option (1-4): ")
 }
 
 // displayMonitoringMenu shows the monitoring submenu
 func displayMonitoringMenu() {
-	fmt.Println("\n" + strings.Repeat("=", 50))
-	fmt.Println("           📊 Monitoring Options")
-	fmt.Println(strings.Repeat("=", 50))
+	fmt.Println("\n📊 Monitoring Options")
+	fmt.Println(strings.Repeat("-", 30))
 	fmt.Println("1. System Information")
 	fmt.Println("2. CPU Monitor")
 	fmt.Println("3. Memory Monitor")
@@ -52,8 +51,8 @@ func displayMonitoringMenu() {
 	fmt.Println("5. Network Monitor")
 	fmt.Println("6. Process Monitor")
 	fmt.Println("7. Back to Main Menu")
-	fmt.Println(strings.Repeat("=", 50))
-	fmt.Print("Please select a monitoring option (1-7): ")
+	fmt.Println(strings.Repeat("-", 30))
+	fmt.Print("Select option (1-7): ")
 }
 
 // getUserChoice gets user input and validates it for main menu
@@ -66,12 +65,12 @@ func getUserChoice(maxOptions int) int {
 
 		choice, err := strconv.Atoi(input)
 		if err != nil {
-			fmt.Printf("❌ Invalid input! Please enter a number between 1 and %d: ", maxOptions)
+			fmt.Printf("Invalid input! Enter 1-%d: ", maxOptions)
 			continue
 		}
 
 		if choice < 1 || choice > maxOptions {
-			fmt.Printf("❌ Invalid option! Please enter a number between 1 and %d: ", maxOptions)
+			fmt.Printf("Invalid option! Enter 1-%d: ", maxOptions)
 			continue
 		}
 
@@ -81,18 +80,24 @@ func getUserChoice(maxOptions int) int {
 
 // handleMainMenuChoice processes the user's main menu choice
 func handleMainMenuChoice(choice int) {
+	// Clear screen after selection
+	fmt.Print("\033[2J\033[H")
+
 	switch choice {
 	case 1:
-		fmt.Println("\n🚀 Starting monitoring...")
+		fmt.Println("🚀 Start Monitoring")
+		fmt.Println(strings.Repeat("-", 30))
 		startMonitoring()
 	case 2:
-		fmt.Println("\n⚙️  Opening settings...")
+		fmt.Println("⚙️  Settings")
+		fmt.Println(strings.Repeat("-", 30))
 		showSettings()
 	case 3:
-		fmt.Println("\n👨‍💻 Developer options...")
+		fmt.Println("👨‍💻 Developer")
+		fmt.Println(strings.Repeat("-", 30))
 		showDeveloper()
 	case 4:
-		fmt.Println("\n👋 Goodbye! Thank you for using Simple Monitor.")
+		fmt.Println("👋 Goodbye! Thank you for using Simple Monitor.")
 		os.Exit(0)
 	}
 }
@@ -103,27 +108,36 @@ func startMonitoring() {
 		displayMonitoringMenu()
 		choice := getUserChoice(7)
 
+		// Clear screen after selection
+		fmt.Print("\033[2J\033[H")
+
 		switch choice {
 		case 1:
-			fmt.Println("\n📊 Displaying system information...")
+			fmt.Println("📊 System Information")
+			fmt.Println(strings.Repeat("-", 30))
 			showSystemInfo()
 		case 2:
-			fmt.Println("\n🖥️  Starting CPU monitoring...")
+			fmt.Println("🖥️  CPU Monitor")
+			fmt.Println(strings.Repeat("-", 30))
 			monitorCPU()
 		case 3:
-			fmt.Println("\n💾 Starting memory monitoring...")
+			fmt.Println("💾 Memory Monitor")
+			fmt.Println(strings.Repeat("-", 30))
 			monitorMemory()
 		case 4:
-			fmt.Println("\n💿 Starting disk monitoring...")
+			fmt.Println("💿 Disk Monitor")
+			fmt.Println(strings.Repeat("-", 30))
 			monitorDisk()
 		case 5:
-			fmt.Println("\n🌐 Starting network monitoring...")
+			fmt.Println("🌐 Network Monitor")
+			fmt.Println(strings.Repeat("-", 30))
 			monitorNetwork()
 		case 6:
-			fmt.Println("\n⚙️  Displaying processes...")
+			fmt.Println("⚙️  Process Monitor")
+			fmt.Println(strings.Repeat("-", 30))
 			showProcesses()
 		case 7:
-			fmt.Println("\n⬅️  Returning to main menu...")
+			fmt.Println("⬅️  Returning to main menu...")
 			return
 		}
 	}
@@ -131,44 +145,49 @@ func startMonitoring() {
 
 // showSettings displays settings menu
 func showSettings() {
-	fmt.Println("🔧 Settings will be implemented in the next version...")
+	fmt.Println("Settings - Coming soon...")
 	waitForEnter()
 }
 
 // showDeveloper displays developer options
 func showDeveloper() {
-	fmt.Println("👨‍💻 Developer options will be implemented in the next version...")
+	fmt.Println("Developer options - Coming soon...")
 	waitForEnter()
 }
 
-// Placeholder functions for different monitoring features
+// System information manager instance
+var systemInfoManager = systeminfo.NewSystemInfoManager()
+
+// showSystemInfo displays comprehensive system information
 func showSystemInfo() {
-	fmt.Println("🔧 System information will be implemented in the next version...")
+	if err := systemInfoManager.ShowSystemInfo(); err != nil {
+		fmt.Printf("❌ Error displaying system information: %v\n", err)
+	}
 	waitForEnter()
 }
 
 func monitorCPU() {
-	fmt.Println("🖥️  CPU monitoring will be implemented in the next version...")
+	fmt.Println("CPU Monitor - Coming soon...")
 	waitForEnter()
 }
 
 func monitorMemory() {
-	fmt.Println("💾 Memory monitoring will be implemented in the next version...")
+	fmt.Println("Memory Monitor - Coming soon...")
 	waitForEnter()
 }
 
 func monitorDisk() {
-	fmt.Println("💿 Disk monitoring will be implemented in the next version...")
+	fmt.Println("Disk Monitor - Coming soon...")
 	waitForEnter()
 }
 
 func monitorNetwork() {
-	fmt.Println("🌐 Network monitoring will be implemented in the next version...")
+	fmt.Println("Network Monitor - Coming soon...")
 	waitForEnter()
 }
 
 func showProcesses() {
-	fmt.Println("⚙️  Process monitoring will be implemented in the next version...")
+	fmt.Println("Process Monitor - Coming soon...")
 	waitForEnter()
 }
 
