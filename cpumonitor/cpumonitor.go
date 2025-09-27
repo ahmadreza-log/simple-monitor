@@ -84,14 +84,12 @@ func (manager *CPUMonitorManager) StartSingleSnapshot() error {
 	// Display CPU data
 	manager.displayer.DisplayCPUMonitorData(data)
 
-	// Export to file if configured
-	if manager.collector.config.ExportToFile {
-		filePath, err := manager.exporter.ExportToJSON(data, "cpumonitor")
-		if err != nil {
-			fmt.Printf("⚠️  Warning: Failed to export data: %v\n", err)
-		} else {
-			fmt.Printf("\n💾 CPU data saved to: %s\n", filePath)
-		}
+	// Always export to file for CPU monitor
+	filePath, err := manager.exporter.ExportToJSON(data, "cpumonitor")
+	if err != nil {
+		fmt.Printf("⚠️  Warning: Failed to export data: %v\n", err)
+	} else {
+		fmt.Printf("\n💾 CPU data saved to: %s\n", filePath)
 	}
 
 	return nil
@@ -126,14 +124,12 @@ func (manager *CPUMonitorManager) updateAndDisplay() {
 		fmt.Printf("\n❌ Error collecting CPU data: %v\n", err)
 		return
 	}
-
+	
 	// Display updated data
 	manager.displayer.DisplayCPUMonitorData(data)
-
-	// Export data if configured
-	if manager.collector.config.ExportToFile {
-		manager.exportData(data)
-	}
+	
+	// Always export data for live monitoring
+	manager.exportData(data)
 }
 
 // exportData exports CPU data to file
@@ -143,9 +139,10 @@ func (manager *CPUMonitorManager) exportData(data *CPUMonitorData) {
 		// Don't display error for every export to avoid cluttering the display
 		return
 	}
-
-	// Only show export message occasionally to avoid spam
-	if time.Now().Second()%30 == 0 {
+	
+	// Show export message every 10 seconds to avoid spam
+	now := time.Now()
+	if now.Second()%10 == 0 {
 		fmt.Printf("\n💾 Data exported to: %s\n", filePath)
 	}
 }
