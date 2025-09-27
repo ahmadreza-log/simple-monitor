@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"simple-monitor/cpumonitor"
 	"simple-monitor/systeminfo"
 	"strconv"
 	"strings"
@@ -158,6 +159,9 @@ func showDeveloper() {
 // System information manager instance
 var systemInfoManager = systeminfo.NewSystemInfoManager()
 
+// CPU monitor manager instance
+var cpuMonitorManager = cpumonitor.NewCPUMonitorManager()
+
 // showSystemInfo displays comprehensive system information
 func showSystemInfo() {
 	if err := systemInfoManager.ShowSystemInfo(); err != nil {
@@ -167,8 +171,31 @@ func showSystemInfo() {
 }
 
 func monitorCPU() {
-	fmt.Println("CPU Monitor - Coming soon...")
-	waitForEnter()
+	fmt.Println("🖥️  CPU Monitor")
+	fmt.Println(strings.Repeat("-", 30))
+	fmt.Println("1. Live Monitoring")
+	fmt.Println("2. Single Snapshot")
+	fmt.Println("3. Back to Monitoring Menu")
+	fmt.Println(strings.Repeat("-", 30))
+	fmt.Print("Select option (1-3): ")
+
+	choice := getUserChoice(3)
+
+	switch choice {
+	case 1:
+		fmt.Println("Starting live CPU monitoring...")
+		if err := cpuMonitorManager.StartLiveMonitoring(); err != nil {
+			fmt.Printf("❌ Error starting CPU monitoring: %v\n", err)
+		}
+		waitForEnter()
+	case 2:
+		if err := cpuMonitorManager.StartSingleSnapshot(); err != nil {
+			fmt.Printf("❌ Error displaying CPU information: %v\n", err)
+		}
+		waitForEnter()
+	case 3:
+		return
+	}
 }
 
 func monitorMemory() {
