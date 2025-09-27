@@ -6,24 +6,26 @@ import (
 )
 
 // SystemInfoManager is the main interface for system information operations
-// This struct coordinates between the collector and displayer to provide
+// This struct coordinates between the collector, displayer, and exporter to provide
 // a complete system information management solution
 type SystemInfoManager struct {
 	collector *SystemInfoCollector
 	displayer *SystemInfoDisplayer
+	exporter  *SystemInfoExporter
 }
 
 // NewSystemInfoManager creates a new instance of SystemInfoManager
-// with default collector and displayer configurations
+// with default collector, displayer, and exporter configurations
 func NewSystemInfoManager() *SystemInfoManager {
 	return &SystemInfoManager{
 		collector: NewSystemInfoCollector(),
 		displayer: NewSystemInfoDisplayer(),
+		exporter:  NewSystemInfoExporter(),
 	}
 }
 
-// ShowSystemInfo displays comprehensive system information
-// This is the main public method that collects and displays all system data
+// ShowSystemInfo displays comprehensive system information and exports to JSON
+// This is the main public method that collects, displays, and saves all system data
 func (manager *SystemInfoManager) ShowSystemInfo() error {
 	fmt.Println("🔍 Collecting system information...")
 
@@ -35,6 +37,14 @@ func (manager *SystemInfoManager) ShowSystemInfo() error {
 
 	// Display system information
 	manager.displayer.DisplaySystemInfo(systemInfo)
+
+	// Export to JSON file
+	filePath, err := manager.exporter.ExportToJSON(systemInfo, "systeminfo")
+	if err != nil {
+		return fmt.Errorf("failed to export system information: %w", err)
+	}
+
+	fmt.Printf("\n💾 System information saved to: %s\n", filePath)
 
 	return nil
 }
@@ -182,4 +192,41 @@ func (manager *SystemInfoManager) SetDisplayOptions(showDetailed bool, useColors
 func (manager *SystemInfoManager) SetCollectionOptions(includeTemperature bool, includeNetworkStats bool) {
 	manager.collector.IncludeTemperature = includeTemperature
 	manager.collector.IncludeNetworkStats = includeNetworkStats
+}
+
+// ExportSystemInfo exports system information to JSON without displaying it
+// This method is useful for automated exports or background tasks
+func (manager *SystemInfoManager) ExportSystemInfo() (string, error) {
+	fmt.Println("🔍 Collecting system information for export...")
+
+	// Collect system information
+	systemInfo, err := manager.collector.CollectSystemInfo()
+	if err != nil {
+		return "", fmt.Errorf("failed to collect system information: %w", err)
+	}
+
+	// Export to JSON file
+	filePath, err := manager.exporter.ExportToJSON(systemInfo, "systeminfo")
+	if err != nil {
+		return "", fmt.Errorf("failed to export system information: %w", err)
+	}
+
+	return filePath, nil
+}
+
+// SetExportOptions configures the export options
+func (manager *SystemInfoManager) SetExportOptions(logsDir string, prettyPrint bool, createSubDirs bool) {
+	manager.exporter.SetLogsDirectory(logsDir)
+	manager.exporter.SetPrettyPrint(prettyPrint)
+	manager.exporter.SetCreateSubDirs(createSubDirs)
+}
+
+// ListExportedFiles returns a list of exported system information files
+func (manager *SystemInfoManager) ListExportedFiles() ([]string, error) {
+	return manager.exporter.ListExportedFiles("systeminfo")
+}
+
+// CleanOldExports removes old exported files
+func (manager *SystemInfoManager) CleanOldExports(daysToKeep int) error {
+	return manager.exporter.CleanOldFiles("systeminfo", daysToKeep)
 }

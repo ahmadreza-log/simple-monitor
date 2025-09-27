@@ -36,6 +36,9 @@ Thumbs.db
 # Log files
 *.log
 
+# Application logs directory
+logs/
+
 # Build output
 /build/
 /dist/
