@@ -67,22 +67,40 @@ func displayMonitoringMenu() {
 func getUserChoice(maxOptions int) int {
 	scanner := bufio.NewScanner(os.Stdin)
 
+	// Set up signal handling for this function
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
 	for {
-		scanner.Scan()
-		input := strings.TrimSpace(scanner.Text())
+		// Use a goroutine to handle input and signals concurrently
+		inputChan := make(chan string, 1)
+		
+		go func() {
+			scanner.Scan()
+			inputChan <- scanner.Text()
+		}()
+		
+		select {
+		case input := <-inputChan:
+			input = strings.TrimSpace(input)
+			
+			choice, err := strconv.Atoi(input)
+			if err != nil {
+				fmt.Printf("Invalid input! Enter 1-%d: ", maxOptions)
+				continue
+			}
 
-		choice, err := strconv.Atoi(input)
-		if err != nil {
-			fmt.Printf("Invalid input! Enter 1-%d: ", maxOptions)
-			continue
+			if choice < 1 || choice > maxOptions {
+				fmt.Printf("Invalid option! Enter 1-%d: ", maxOptions)
+				continue
+			}
+
+			return choice
+			
+		case <-sigChan:
+			fmt.Println("\n\n👋 Goodbye! Thank you for using Simple Monitor.")
+			os.Exit(0)
 		}
-
-		if choice < 1 || choice > maxOptions {
-			fmt.Printf("Invalid option! Enter 1-%d: ", maxOptions)
-			continue
-		}
-
-		return choice
 	}
 }
 
@@ -753,17 +771,6 @@ func waitForEnter() {
 
 func main() {
 	fmt.Println("🚀 Simple Monitor started!")
-
-	// Set up signal handling for graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	// Start a goroutine to handle Ctrl+C
-	go func() {
-		<-sigChan
-		fmt.Println("\n\n👋 Goodbye! Thank you for using Simple Monitor.")
-		os.Exit(0)
-	}()
 
 	for {
 		displayMainMenu()
