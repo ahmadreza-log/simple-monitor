@@ -1,0 +1,173 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+        
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+          
+    - name: Download dependencies
+      run: go mod download
+      
+    - name: Run tests
+      run: go test ./...
+      
+    - name: Build for all platforms
+      shell: pwsh
+      run: |
+        # Execute the build.ps1 script
+        .\build.ps1
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: |
+          ## 🚀 Simple Monitor ${{ github.ref_name }}
+          
+          ### 📦 Downloads
+          
+          **Windows:**
+          - `simple-monitor-windows-amd64.exe` - Windows 64-bit
+          - `simple-monitor-windows-386.exe` - Windows 32-bit
+          - `simple-monitor-windows-arm64.exe` - Windows ARM64
+          
+          **Linux:**
+          - `simple-monitor-linux-amd64` - Linux 64-bit
+          - `simple-monitor-linux-386` - Linux 32-bit
+          - `simple-monitor-linux-arm64` - Linux ARM64
+          
+          **macOS:**
+          - `simple-monitor-darwin-amd64` - macOS Intel
+          - `simple-monitor-darwin-arm64` - macOS Apple Silicon
+          
+          ### 🛠️ Installation
+          
+          1. Download the appropriate binary for your platform
+          2. Make it executable (Linux/macOS): `chmod +x simple-monitor-*`
+          3. Run: `./simple-monitor-*` (or `simple-monitor-*.exe` on Windows)
+          
+          ### 📋 Features
+          
+          - 🖥️ System Information
+          - 🔧 CPU Monitoring
+          - 💾 Memory Monitoring
+          - 💿 Disk Monitoring
+          - 🌐 Network Monitoring
+          - ⚙️ Process Monitoring
+          - 🚀 Quick Test (All Monitors)
+          
+          ### 🔗 Links
+          
+          - [Documentation](https://github.com/${{ github.repository }}/wiki)
+          - [Issues](https://github.com/${{ github.repository }}/issues)
+          - [Discussions](https://github.com/${{ github.repository }}/discussions)
+        draft: false
+        prerelease: false
+        
+    - name: Upload Windows AMD64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-windows-amd64.exe
+        asset_name: simple-monitor-windows-amd64.exe
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Windows 386
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-windows-386.exe
+        asset_name: simple-monitor-windows-386.exe
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Windows ARM64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-windows-arm64.exe
+        asset_name: simple-monitor-windows-arm64.exe
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Linux AMD64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-linux-amd64
+        asset_name: simple-monitor-linux-amd64
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Linux 386
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-linux-386
+        asset_name: simple-monitor-linux-386
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Linux ARM64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-linux-arm64
+        asset_name: simple-monitor-linux-arm64
+        asset_content_type: application/octet-stream
+        
+    - name: Upload macOS AMD64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-darwin-amd64
+        asset_name: simple-monitor-darwin-amd64
+        asset_content_type: application/octet-stream
+        
+    - name: Upload macOS ARM64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./build/simple-monitor-darwin-arm64
+        asset_name: simple-monitor-darwin-arm64
+        asset_content_type: application/octet-stream
