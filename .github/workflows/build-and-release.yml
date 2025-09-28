@@ -1,4 +1,4 @@
-name: Build and Release
+name : Build and Release
 
 on:
   push:
@@ -67,6 +67,8 @@ jobs:
           **macOS:**
           - `simple-monitor-darwin-amd64` - macOS Intel
           - `simple-monitor-darwin-arm64` - macOS Apple Silicon
+          
+          > **Note**: macOS 32-bit (darwin/386) is no longer supported by Go
           
           ### 🛠️ Installation
           
