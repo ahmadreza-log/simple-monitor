@@ -1,6 +1,6 @@
 # 🖥️ Simple Monitor
 
-A comprehensive system monitoring tool built with Go that provides real-time insights into your system's performance, CPU usage, memory consumption, and more.
+A comprehensive system monitoring tool built with Go that provides real-time insights into your system's performance, CPU usage, memory consumption, disk usage, network activity, and process monitoring.
 
 ## ✨ Features
 
@@ -37,6 +37,27 @@ A comprehensive system monitoring tool built with Go that provides real-time ins
 - **Process Details**: PID, name, status, priority
 - **Thread Information**: Thread count per process
 
+### 🚀 Quick Test Feature
+- **Simultaneous Monitoring**: Monitor all systems at once
+- **Real-time Updates**: Live data refresh every 2 seconds
+- **Compact Display**: Essential information in one view
+- **Easy Exit**: Press Ctrl+C to stop anytime
+
+### ⚙️ Advanced Settings
+- **Display Settings**: Refresh rate, format, colors, screen size
+- **Monitoring Settings**: Intervals, auto-start, data retention, alerts
+- **Performance Settings**: CPU priority, memory limits, background mode
+- **Log Settings**: Log level, rotation, directory management
+- **Reset to Defaults**: Restore all settings to factory defaults
+
+### 👨‍💻 Developer Tools
+- **Performance Analysis**: Detailed system performance metrics
+- **Debug Mode**: Enhanced logging and error information
+- **Export Debug Info**: Export system information for troubleshooting
+- **Log Management**: View, clear, and manage log files
+- **Configuration Viewer**: Display all monitor configurations
+- **Test All Monitors**: Comprehensive testing of all components
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -47,7 +68,7 @@ A comprehensive system monitoring tool built with Go that provides real-time ins
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/simple-monitor.git
+   git clone https://github.com/ahmadreza-log/simple-monitor.git
    cd simple-monitor
    ```
 
@@ -96,33 +117,61 @@ A comprehensive system monitoring tool built with Go that provides real-time ins
 4. Disk Monitor
 5. Network Monitor
 6. Process Monitor
+7. Quick Test (All Monitors)
+8. Back to Main Menu
+------------------------------
+```
+
+### Quick Test Feature
+```
+🚀 Quick Test - All Monitors
+------------------------------
+Last Update: 15:30:45
+
+🖥️  CPU:
+  Usage: 45.2%
+
+💾 Memory:
+  Used: 8.5 GB / 16.0 GB (53.1%)
+
+💿 Disk:
+  C: 120.5 GB / 500.0 GB (24.1%)
+
+🌐 Network:
+  Interfaces: 3
+  Ethernet: RX 125.3 MB, TX 89.7 MB
+
+Press Ctrl+C to stop...
+```
+
+### Settings Menu
+```
+⚙️  Settings
+------------------------------
+1. Export Settings
+2. Display Settings
+3. Monitoring Settings
+4. Performance Settings
+5. Log Settings
+6. Reset to Defaults
 7. Back to Main Menu
 ------------------------------
 ```
 
-### CPU Monitor Features
+### Developer Menu
 ```
-🖥️  CPU MONITOR
-================================================================================
-CPU Model: Intel Core i7-8700K
-Architecture: amd64
-Cores: 6 Physical, 12 Logical
-================================================================================
-
-📊 OVERALL CPU USAGE
---------------------------------------------------
-Overall         [████████████████████████████████████████████████] 75.50%
-
-User Processes: 45.20%
-System Processes: 30.30%
-Idle: 24.50%
-
-🔧 PER-CORE USAGE
---------------------------------------------------
-Core 0          [████████████████████████████████████████████████] 80.20%
-Core 1 (HT)     [████████████████████████████████████████████████] 75.10%
-Core 2          [████████████████████████████████████████████████] 70.30%
-Core 3 (HT)     [████████████████████████████████████████████████] 65.80%
+👨‍💻 Developer Section
+------------------------------
+1. View System Information
+2. View Log Files
+3. Clear Log Files
+4. View Configuration
+5. Test All Monitors
+6. Performance Analysis
+7. Debug Mode
+8. Export Debug Info
+9. Back to Main Menu
+------------------------------
 ```
 
 ## 🏗️ Architecture
@@ -132,23 +181,37 @@ Core 3 (HT)     [█████████████████████
 simple-monitor/
 ├── main.go                 # Main application entry point
 ├── go.mod                  # Go module definition
+├── go.sum                  # Go module checksums
 ├── .gitignore             # Git ignore rules
 ├── README.md              # Project documentation
-├── logs/                  # Log files directory
-│   ├── systeminfo/        # System info exports
-│   └── cpumonitor/        # CPU monitor exports
-├── systeminfo/            # System information module
-│   ├── types.go           # Data structures
-│   ├── collector.go       # Data collection
-│   ├── displayer.go       # Data display
-│   ├── exporter.go        # Data export
-│   └── systeminfo.go      # Main interface
-└── cpumonitor/            # CPU monitoring module
-    ├── types.go           # Data structures
-    ├── collector.go       # Data collection
-    ├── displayer.go       # Data display
-    ├── exporter.go        # Data export
-    └── cpumonitor.go      # Main interface
+├── CHANGELOG.md           # Version history
+├── CONTRIBUTING.md        # Contribution guidelines
+├── LICENSE                # MIT License
+├── Makefile              # Build automation
+├── build.ps1             # PowerShell build script
+├── logs/                 # Log files directory
+│   ├── systeminfo/       # System info exports
+│   ├── cpumonitor/       # CPU monitor exports
+│   ├── memorymonitor/    # Memory monitor exports
+│   ├── diskmonitor/      # Disk monitor exports
+│   ├── networkmonitor/   # Network monitor exports
+│   └── processmonitor/    # Process monitor exports
+├── systeminfo/           # System information module
+│   ├── types.go          # Data structures
+│   ├── collector.go      # Data collection
+│   ├── displayer.go      # Data display
+│   ├── exporter.go       # Data export
+│   └── systeminfo.go     # Main interface
+├── cpumonitor/           # CPU monitoring module
+│   ├── types.go         # Data structures
+│   ├── collector.go     # Data collection
+│   ├── displayer.go     # Data display
+│   ├── exporter.go      # Data export
+│   └── cpumonitor.go    # Main interface
+├── memorymonitor/       # Memory monitoring module
+├── diskmonitor/         # Disk monitoring module
+├── networkmonitor/      # Network monitoring module
+└── processmonitor/      # Process monitoring module
 ```
 
 ### Design Patterns
@@ -157,6 +220,7 @@ simple-monitor/
 - **Separation of Concerns**: Collector, Displayer, and Exporter are separate
 - **Interface-Based Design**: Clean interfaces for easy testing and extension
 - **Configuration-Driven**: Configurable options for all features
+- **Signal Handling**: Proper Ctrl+C handling for graceful shutdown
 
 ## 🔧 Configuration
 
@@ -190,8 +254,8 @@ exporter.SetCreateSubDirs(true)
 
 ### Supported Formats
 - **JSON**: Structured data export with metadata
-- **CSV**: Tabular data export (planned)
-- **Text**: Human-readable format (planned)
+- **CSV**: Tabular data export
+- **Text**: Human-readable format
 
 ### Export Structure
 ```json
@@ -257,32 +321,33 @@ exporter.SetCreateSubDirs(true)
 - **Comprehensive Comments**: All public functions documented
 - **Error Handling**: Proper error propagation and logging
 
-## 📝 TODO
+## 🚀 Key Features
 
-### Phase 1 - Core Features ✅
+### ✅ Completed Features
 - [x] System Information module
 - [x] CPU Monitor with live updates
+- [x] Memory Monitor with real-time tracking
+- [x] Disk Monitor with usage statistics
+- [x] Network Monitor with traffic analysis
+- [x] Process Monitor with detailed information
 - [x] JSON export functionality
 - [x] Modular architecture
+- [x] Quick Test feature for simultaneous monitoring
+- [x] Advanced Settings with comprehensive options
+- [x] Developer Tools for debugging and analysis
+- [x] Proper Ctrl+C signal handling
+- [x] Configuration management
+- [x] Log file management
 
-### Phase 2 - Enhanced Monitoring
-- [ ] Memory Monitor implementation
-- [ ] Disk Monitor implementation
-- [ ] Network Monitor implementation
-- [ ] Process Monitor implementation
-
-### Phase 3 - Advanced Features
-- [ ] Settings configuration UI
-- [ ] Alert system
+### 🔄 Future Enhancements
+- [ ] Web dashboard interface
 - [ ] Historical data analysis
-- [ ] Web dashboard
-- [ ] Plugin system
-
-### Phase 4 - Platform Support
-- [ ] Windows-specific collectors
-- [ ] Linux-specific collectors
-- [ ] macOS-specific collectors
-- [ ] Cross-platform compatibility
+- [ ] Alert system with notifications
+- [ ] Plugin system for custom monitors
+- [ ] Cross-platform optimizations
+- [ ] Performance profiling tools
+- [ ] Data visualization charts
+- [ ] Remote monitoring capabilities
 
 ## 🤝 Contributing
 
@@ -323,22 +388,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/simple-monitor/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/simple-monitor/discussions)
-- **Email**: support@simplemonitor.dev
+- **Issues**: [GitHub Issues](https://github.com/ahmadreza-log/simple-monitor/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ahmadreza-log/simple-monitor/discussions)
+- **Email**: ahmadreza.log@gmail.com
 
 ## 🔗 Links
 
-- **Documentation**: [Wiki](https://github.com/yourusername/simple-monitor/wiki)
+- **Documentation**: [Wiki](https://github.com/ahmadreza-log/simple-monitor/wiki)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
-- **Roadmap**: [ROADMAP.md](ROADMAP.md)
+- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ and Go**
+**Made with ❤️ and Go by [@ahmadreza-log](https://github.com/ahmadreza-log)**
 
-[⭐ Star this repo](https://github.com/yourusername/simple-monitor) | [🐛 Report Bug](https://github.com/yourusername/simple-monitor/issues) | [💡 Request Feature](https://github.com/yourusername/simple-monitor/issues)
+[⭐ Star this repo](https://github.com/ahmadreza-log/simple-monitor) | [🐛 Report Bug](https://github.com/ahmadreza-log/simple-monitor/issues) | [💡 Request Feature](https://github.com/ahmadreza-log/simple-monitor/issues)
 
 </div>
