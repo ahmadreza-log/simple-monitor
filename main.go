@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"simple-monitor/cpumonitor"
 	"simple-monitor/diskmonitor"
 	"simple-monitor/memorymonitor"
@@ -12,6 +13,7 @@ import (
 	"simple-monitor/systeminfo"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -178,7 +180,225 @@ func showSettings() {
 
 // showDeveloper displays developer options
 func showDeveloper() {
-	fmt.Println("Developer options - Coming soon...")
+	for {
+		fmt.Println("\n👨‍💻 Developer Section")
+		fmt.Println(strings.Repeat("-", 30))
+		fmt.Println("1. View System Information")
+		fmt.Println("2. View Log Files")
+		fmt.Println("3. Clear Log Files")
+		fmt.Println("4. View Configuration")
+		fmt.Println("5. Test All Monitors")
+		fmt.Println("6. Back to Main Menu")
+		fmt.Println(strings.Repeat("-", 30))
+		fmt.Print("Select option (1-6): ")
+
+		choice := getUserChoice(6)
+
+		switch choice {
+		case 1:
+			showDeveloperSystemInfo()
+		case 2:
+			showLogFiles()
+		case 3:
+			clearLogFiles()
+		case 4:
+			showConfiguration()
+		case 5:
+			testAllMonitors()
+		case 6:
+			return
+		}
+	}
+}
+
+// showDeveloperSystemInfo displays detailed system information for developers
+func showDeveloperSystemInfo() {
+	fmt.Println("\n🔧 Developer System Information")
+	fmt.Println(strings.Repeat("-", 50))
+	
+	// Show system info
+	if err := systemInfoManager.ShowSystemInfo(); err != nil {
+		fmt.Printf("❌ Error displaying system information: %v\n", err)
+	}
+	
+	// Show Go version and build info
+	fmt.Println("\n📋 Build Information:")
+	fmt.Printf("Go Version: %s\n", "1.21+")
+	fmt.Printf("Build Time: %s\n", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("Platform: %s\n", "Windows/AMD64")
+	
+	waitForEnter()
+}
+
+// showLogFiles displays available log files
+func showLogFiles() {
+	fmt.Println("\n📁 Log Files")
+	fmt.Println(strings.Repeat("-", 30))
+	
+	// Check logs directory
+	logDir := "logs"
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		fmt.Println("No log files found.")
+		waitForEnter()
+		return
+	}
+	
+	// List log files
+	files, err := os.ReadDir(logDir)
+	if err != nil {
+		fmt.Printf("❌ Error reading log directory: %v\n", err)
+		waitForEnter()
+		return
+	}
+	
+	if len(files) == 0 {
+		fmt.Println("No log files found.")
+		waitForEnter()
+		return
+	}
+	
+	fmt.Println("Available log files:")
+	for i, file := range files {
+		if !file.IsDir() {
+			fmt.Printf("%d. %s\n", i+1, file.Name())
+		}
+	}
+	
+	waitForEnter()
+}
+
+// clearLogFiles clears all log files
+func clearLogFiles() {
+	fmt.Println("\n🗑️  Clear Log Files")
+	fmt.Println(strings.Repeat("-", 30))
+	fmt.Println("This will delete all log files. Are you sure?")
+	fmt.Println("1. Yes, delete all logs")
+	fmt.Println("2. No, keep logs")
+	fmt.Print("Select option (1-2): ")
+	
+	choice := getUserChoice(2)
+	
+	if choice == 1 {
+		logDir := "logs"
+		if _, err := os.Stat(logDir); os.IsNotExist(err) {
+			fmt.Println("No log directory found.")
+			waitForEnter()
+			return
+		}
+		
+		files, err := os.ReadDir(logDir)
+		if err != nil {
+			fmt.Printf("❌ Error reading log directory: %v\n", err)
+			waitForEnter()
+			return
+		}
+		
+		deletedCount := 0
+		for _, file := range files {
+			if !file.IsDir() {
+				if err := os.Remove(logDir + "/" + file.Name()); err == nil {
+					deletedCount++
+				}
+			}
+		}
+		
+		fmt.Printf("✅ Deleted %d log files.\n", deletedCount)
+	} else {
+		fmt.Println("Log files kept.")
+	}
+	
+	waitForEnter()
+}
+
+// showConfiguration displays current configuration
+func showConfiguration() {
+	fmt.Println("\n⚙️  Current Configuration")
+	fmt.Println(strings.Repeat("-", 50))
+	
+	// CPU Monitor Config
+	cpuConfig := cpuMonitorManager.GetConfiguration()
+	fmt.Println("🖥️  CPU Monitor:")
+	fmt.Printf("  - Refresh Interval: %v\n", cpuConfig.RefreshInterval)
+	fmt.Printf("  - Export Format: %s\n", cpuConfig.ExportFormat)
+	fmt.Printf("  - Export Enabled: %t\n", cpuConfig.ExportToFile)
+	
+	// Memory Monitor Config
+	memoryConfig := memoryMonitorManager.GetConfig()
+	fmt.Println("\n💾 Memory Monitor:")
+	fmt.Printf("  - Refresh Interval: %v\n", memoryConfig.RefreshInterval)
+	fmt.Printf("  - Export Format: %s\n", memoryConfig.ExportFormat)
+	fmt.Printf("  - Export Enabled: %t\n", memoryConfig.ExportToFile)
+	
+	// Disk Monitor Config
+	diskConfig := diskMonitorManager.GetConfig()
+	fmt.Println("\n💿 Disk Monitor:")
+	fmt.Printf("  - Refresh Interval: %v\n", diskConfig.RefreshInterval)
+	fmt.Printf("  - Export Format: %s\n", diskConfig.ExportFormat)
+	fmt.Printf("  - Export Enabled: %t\n", diskConfig.ExportToFile)
+	
+	// Network Monitor Config
+	networkConfig := networkMonitorManager.GetConfig()
+	fmt.Println("\n🌐 Network Monitor:")
+	fmt.Printf("  - Refresh Interval: %v\n", networkConfig.RefreshInterval)
+	fmt.Printf("  - Export Format: %s\n", networkConfig.ExportFormat)
+	fmt.Printf("  - Export Enabled: %t\n", networkConfig.ExportToFile)
+	
+	// Process Monitor Config
+	processConfig := processMonitorManager.GetConfig()
+	fmt.Println("\n⚙️  Process Monitor:")
+	fmt.Printf("  - Refresh Interval: %v\n", processConfig.RefreshInterval)
+	fmt.Printf("  - Export Format: %s\n", processConfig.ExportFormat)
+	fmt.Printf("  - Export Enabled: %t\n", processConfig.ExportToFile)
+	
+	waitForEnter()
+}
+
+// testAllMonitors tests all monitor components
+func testAllMonitors() {
+	fmt.Println("\n🧪 Testing All Monitors")
+	fmt.Println(strings.Repeat("-", 30))
+	
+	// Test System Info
+	fmt.Println("Testing System Info...")
+	if err := systemInfoManager.ShowSystemInfo(); err != nil {
+		fmt.Printf("❌ System Info Error: %v\n", err)
+	} else {
+		fmt.Println("✅ System Info: OK")
+	}
+	
+	// Test CPU Monitor
+	fmt.Println("\nTesting CPU Monitor...")
+	if err := cpuMonitorManager.StartSingleSnapshot(); err != nil {
+		fmt.Printf("❌ CPU Monitor Error: %v\n", err)
+	} else {
+		fmt.Println("✅ CPU Monitor: OK")
+	}
+	
+	// Test Memory Monitor
+	fmt.Println("\nTesting Memory Monitor...")
+	if err := memoryMonitorManager.StartSingleSnapshot(); err != nil {
+		fmt.Printf("❌ Memory Monitor Error: %v\n", err)
+	} else {
+		fmt.Println("✅ Memory Monitor: OK")
+	}
+	
+	// Test Disk Monitor
+	fmt.Println("\nTesting Disk Monitor...")
+	if err := diskMonitorManager.StartSingleSnapshot(); err != nil {
+		fmt.Printf("❌ Disk Monitor Error: %v\n", err)
+	} else {
+		fmt.Println("✅ Disk Monitor: OK")
+	}
+	
+	// Test Network Monitor
+	fmt.Println("\nTesting Network Monitor...")
+	if err := networkMonitorManager.StartSingleSnapshot(); err != nil {
+		fmt.Printf("❌ Network Monitor Error: %v\n", err)
+	} else {
+		fmt.Println("✅ Network Monitor: OK")
+	}
+	
+	fmt.Println("\n🎉 All tests completed!")
 	waitForEnter()
 }
 
@@ -533,6 +753,17 @@ func waitForEnter() {
 
 func main() {
 	fmt.Println("🚀 Simple Monitor started!")
+
+	// Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start a goroutine to handle Ctrl+C
+	go func() {
+		<-sigChan
+		fmt.Println("\n\n👋 Goodbye! Thank you for using Simple Monitor.")
+		os.Exit(0)
+	}()
 
 	for {
 		displayMainMenu()
