@@ -17,9 +17,10 @@ type CPUMonitorManager struct {
 	exporter  *CPUMonitorExporter
 
 	// Monitoring state
-	isRunning     bool
-	stopChannel   chan bool
-	refreshTicker *time.Ticker
+	isRunning      bool
+	stopChannel    chan bool
+	refreshTicker  *time.Ticker
+	lastExportTime time.Time
 }
 
 // NewCPUMonitorManager creates a new instance of CPUMonitorManager
@@ -124,12 +125,27 @@ func (manager *CPUMonitorManager) updateAndDisplay() {
 		fmt.Printf("\n❌ Error collecting CPU data: %v\n", err)
 		return
 	}
-	
+
 	// Display updated data
 	manager.displayer.DisplayCPUMonitorData(data)
-	
-	// Always export data for live monitoring
-	manager.exportData(data)
+
+	// Export data based on export interval
+	manager.exportDataIfNeeded(data)
+}
+
+// exportDataIfNeeded exports CPU data to file based on export interval
+func (manager *CPUMonitorManager) exportDataIfNeeded(data *CPUMonitorData) {
+	// Check if export is enabled
+	if !manager.collector.config.ExportToFile {
+		return
+	}
+
+	// Check if it's time to export based on export interval
+	now := time.Now()
+	if manager.lastExportTime.IsZero() || now.Sub(manager.lastExportTime) >= manager.collector.config.ExportInterval {
+		manager.exportData(data)
+		manager.lastExportTime = now
+	}
 }
 
 // exportData exports CPU data to file
@@ -139,12 +155,8 @@ func (manager *CPUMonitorManager) exportData(data *CPUMonitorData) {
 		// Don't display error for every export to avoid cluttering the display
 		return
 	}
-	
-	// Show export message every 10 seconds to avoid spam
-	now := time.Now()
-	if now.Second()%10 == 0 {
-		fmt.Printf("\n💾 Data exported to: %s\n", filePath)
-	}
+
+	fmt.Printf("\n💾 Data exported to: %s\n", filePath)
 }
 
 // GetCPUUsageHistory returns the current CPU usage history

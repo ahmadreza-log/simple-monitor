@@ -239,7 +239,6 @@ func (displayer *CPUMonitorDisplayer) displayTopProcesses(data *CPUMonitorData) 
 		"PID",
 		"Process",
 		"CPU%",
-		"Memory%",
 		"Status",
 		displayer.colorize("", displayer.ColorReset))
 
